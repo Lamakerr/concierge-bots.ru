@@ -191,7 +191,7 @@ class BotController extends Controller
 
     public function setWebhook()
     {
-        $telegram = new Api('7731831213:AAHJ5MRRkKZrfUjEcZmT_YooGI_iwNaC1lU');
+        $telegram = new Api('token');
         $response = $telegram->setWebhook(['url' => 'https://ns29lc-93-171-46-33.ru.tuna.am/webhook']);
         return $response;
     }
@@ -199,7 +199,7 @@ class BotController extends Controller
     public function handleWebhook(Request $request)
     {
 
-        $telegram = new Api('7731831213:AAHJ5MRRkKZrfUjEcZmT_YooGI_iwNaC1lU');
+        $telegram = new Api('token');
 
         $update = $telegram->getWebhookUpdates();
 
