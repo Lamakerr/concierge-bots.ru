@@ -10,7 +10,7 @@ class DangerCommand extends Command
 {
     protected string $name = 'danger';
     protected string $pattern = '{username}';
-    protected string $description = 'Увдомить о ЧП';
+    protected string $description = 'Уведомить соседей о ЧП';
 
 
     public function handle()

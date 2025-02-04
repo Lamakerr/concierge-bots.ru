@@ -36,24 +36,28 @@ class BotController extends Controller
     private function handleApartmentNumber($telegram, $chatId, $text)
     {
         if (is_numeric($text)) {
-            $apartment = Apartment::where('number', $text)->first();
-            if ($apartment) {
-                $residents = $apartment->residents;
-                $residentList = []; // Создаем массив для жильцов
+    $apartment = Apartment::with('residents')->where('number', $text)->first();
+    if ($apartment) {
+        $residents = $apartment->residents;
+        $residentList = [];
+        
+        // Отладка: проверяем возвращаемых жильцов
+        Log::info('Residents count: ' . $residents->count());
 
-                foreach ($residents as $resident) {
-                    $residentList[] = "Имя: " . $resident->name . ", Telegram: " . $resident->telegram_username . ", Телефон: " . $resident->phone_number;
-                }
+        foreach ($residents as $resident) {
+            $residentList[] = "Имя: " . $resident->name . ", Telegram: " . $resident->telegram_username . ", Телефон: " . $resident->phone_number;
+        }
+        Log::info('Resident List: ', $residentList);
+        $residentMessage = empty($residentList) 
+            ? "Нет зарегистрированных жильцов для квартиры номер $text."
+            : implode("\n", $residentList);
 
-                $residentMessage = implode("\n", $residentList); // Объединяем всех жильцов в одно сообщение
-
-                DialogState::where('chat_id', $chatId)->delete();
-                $telegram->sendMessage([
-                    'chat_id' => $chatId,
-                    'text' => "\nЖильцы кватиры номер $text:\n" . $residentMessage,
-                ]);
-                return $residentList;
-            } else {
+        DialogState::where('chat_id', $chatId)->delete();
+        $telegram->sendMessage([
+            'chat_id' => $chatId,
+            'text' => "\nЖильцы квартиры номер $text:\n" . $residentMessage,
+        ]);
+    }  else {
                 DialogState::where('chat_id', $chatId)->delete();
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
@@ -191,15 +195,15 @@ class BotController extends Controller
 
     public function setWebhook()
     {
-        $telegram = new Api('7731831213:AAHJ5MRRkKZrfUjEcZmT_YooGI_iwNaC1lU');
-        $response = $telegram->setWebhook(['url' => 'https://ns29lc-93-171-46-33.ru.tuna.am/webhook']);
+        $telegram = new Api('6354720815:AAHVjv5veBbLUKwndkfeNFyEM2ZQqnjAY-g');
+        $response = $telegram->setWebhook(['url' => 'https://concierge-bots.ru/webhook']);
         return $response;
     }
 
     public function handleWebhook(Request $request)
     {
 
-        $telegram = new Api('7731831213:AAHJ5MRRkKZrfUjEcZmT_YooGI_iwNaC1lU');
+        $telegram = new Api('6354720815:AAHVjv5veBbLUKwndkfeNFyEM2ZQqnjAY-g');
 
         $update = $telegram->getWebhookUpdates();
 
@@ -209,9 +213,10 @@ class BotController extends Controller
             if ($newChatMemberStatus == 'kicked') {
                 $kickedByUsername = $chatMember->from->username;
                 $resident = Resident::where('telegram_username', '@' . $kickedByUsername)->first();
+                Log::info('Кваттро Бот был заблокирован пользователем: ' . $kickedByUsername);
                 $resident->status = 'kicked';
                 $resident->update();
-                Log::info('Кваттро Бот был заблокирован пользователем: ' . $kickedByUsername);
+                
                 return;
             }
         }

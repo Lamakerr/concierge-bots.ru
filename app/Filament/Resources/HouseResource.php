@@ -24,11 +24,11 @@ class HouseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('Улица')->required(),
-                Forms\Components\TextInput::make('Номер дома')->integer()->required(),
-                Forms\Components\TextInput::make('Корпус')->nullable()->integer(),
-                Forms\Components\TextInput::make('Кол-во этажей')->integer()->required(),
-                Forms\Components\TextInput::make('Кол-во подъездов')->integer()->required(),
+                Forms\Components\TextInput::make('street')->required(),
+                Forms\Components\TextInput::make('number')->integer()->required(),
+                Forms\Components\TextInput::make('building')->nullable()->integer(),
+                Forms\Components\TextInput::make('floors')->integer()->required(),
+                Forms\Components\TextInput::make('entrances')->integer()->required(),
             ]);
     }
 

@@ -6,12 +6,14 @@ use App\Filament\Resources\ResidentResource\Pages;
 use App\Filament\Resources\ResidentResource\RelationManagers;
 use App\Models\House;
 use App\Models\Resident;
+use App\Models\Apartment;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rules\Unique;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Actions\Action;
@@ -43,7 +45,7 @@ class ResidentResource extends Resource
             Forms\Components\TextInput::make('chat_id')->label('Telegram chat id')->nullable(),
             Forms\Components\TextInput::make('phone_number')->label('Номер телефона')->required(),
 
-            Forms\Components\Select::make('resident_roles_id')
+            Forms\Components\Select::make('resident_role_id')
                 ->placeholder('Выберите роль')
                 ->label('Роль')
                 ->relationship('role', 'role')
@@ -85,7 +87,15 @@ class ResidentResource extends Resource
                 ->schema([
                     Forms\Components\TextInput::make('number')
                         ->label('Номер квартиры')
-                        ->required(),
+                        ->required()
+                       ->unique(
+        table: 'apartments', // Исправлено название таблицы
+        column: 'number',
+        ignoreRecord: true,
+        modifyRuleUsing: function (Unique $rule) {
+            return $rule->where('house_id', fn($get) => $get('house_id'));
+        }
+    ),
                         Forms\Components\TextInput::make('floor')
                         ->label('Этаж')
                         ->required(),
@@ -93,7 +103,7 @@ class ResidentResource extends Resource
                         ->label('Подъезд')
                         ->required(),
 
-                    Forms\Components\Select::make('apartments.house_id')
+                    Forms\Components\Select::make('house_id')
                         ->label('Выберите дом')
                         ->relationship('house', 'street')
                         ->getOptionLabelFromRecordUsing(fn(House $house) => $house->getFilamentName())
@@ -127,11 +137,26 @@ class ResidentResource extends Resource
                             ->required(),
                     ])
                         ->label('Данные о доме')
-                        ->hidden(fn($get) => $get('apartments.house_id') !== null), // Скрывать, если дом выбран
-                ])
-                ->createItemButtonLabel('Добавить квартиру'),
+                        ->hidden(fn($get) => $get('house_id') !== null), // Скрывать, если дом выбран
+                ]),
                     ]);
     }
+    
+    public static function create(Create $record): void
+       {
+           
+
+           // Проверка на существование квартиры
+           $apartment = Apartment::where('number', $record->apartment_number)->first();
+
+           if (!$apartment) {
+               // Если квартира не найдена, можно выбросить ошибку или создать квартиру
+               throw ValidationException::withMessages([
+                   'apartment_number' => 'Квартира с таким номером не существует.',
+               ]);
+           }
+
+       }
 
     public static function table(Table $table): Table
     {

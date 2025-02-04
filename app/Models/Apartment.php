@@ -12,7 +12,8 @@ class Apartment extends Model
     protected $fillable = [
         'number', 
         'floor', 
-        'house_id', 
+        'house_id',
+        'entrance',
         'status'
     ];
 

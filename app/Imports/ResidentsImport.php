@@ -14,32 +14,43 @@ class ResidentsImport implements WithHeadingRow, OnEachRow
     public function onRow(Row $row)
     {
         $row = $row->toArray();
-        // dd($row);
+
         // Проверяем наличие необходимых ключей и их значений
-        if (!isset($row['apartment']) || !isset($row['floor']) || !isset($row['telegram_username']) || !isset($row['phone_number']) || !isset($row['name'])) {
-            // Если ключ отсутствует, можно просто выйти из функции или использовать continue
-            return; // Или continue; если это в цикле
+        if (!isset($row['apartment']) || !isset($row['floor']) || !isset($row['telegram_username']) || !isset($row['phone_number']) || !isset($row['name']) || !isset($row['entrance'])) {
+            return; 
         }
+
         $residentRoleId = ResidentRole::first()->id; // Измените, если у вас есть логика для определения роли
 
-        // Создание или получение квартиры
-        $apartment = Apartment::firstOrCreate([
-            'number' => $row['apartment'], // Номер квартиры
-            'floor' => $row['floor'], 
-            'entrance' => 1, // Подъезд
-            'house_id' => 1001, // Убедитесь, что вы указываете существующий house_id
-        ]);
+        // Поиск квартиры по номеру, этажу и подъезду
+        $apartment = Apartment::where('number', $row['apartment'])
+            ->where('floor', $row['floor'])
+            ->where('entrance', $row['entrance'])
+            ->first();
+
+        // Если квартира не найдена, создаем новую
+        if (!$apartment) {
+            $apartment = Apartment::create([
+                'number' => $row['apartment'],
+                'floor' => $row['floor'],
+                'entrance' => $row['entrance'],
+                'house_id' => 1001, // Убедитесь, что вы указываете существующий house_id
+            ]);
+        }
 
         // Создание или получение резидента
         $resident = Resident::firstOrCreate([
-            'telegram_username' => $row['telegram_username'], // Имя пользователя Telegram
-            'phone_number' => $row['phone_number'],       // Номер телефона
+            'telegram_username' => $row['telegram_username'],
+            'phone_number' => $row['phone_number'],
         ], [
-            'name' => $row['name'],               // ФИО
+            'name' => $row['name'],
             'resident_role_id' => $residentRoleId,
         ]);
 
         // Связь между квартирой и резидентом
-        $apartment->residents()->attach($resident->id);
+        // Проверяем, существует ли уже связь, чтобы избежать дублирования
+        if (!$apartment->residents()->where('residents.id', $resident->id)->exists()) {
+            $apartment->residents()->attach($resident->id);
+        }
     }
 }

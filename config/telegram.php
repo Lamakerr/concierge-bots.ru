@@ -40,7 +40,7 @@ return [
     */
     'bots' => [
         'mybot' => [
-            'token' => env('TELEGRAM_BOT_TOKEN', '7731831213:AAHJ5MRRkKZrfUjEcZmT_YooGI_iwNaC1lU'),
+            'token' => env('TELEGRAM_BOT_TOKEN', '6354720815:AAHVjv5veBbLUKwndkfeNFyEM2ZQqnjAY-g'),
             'certificate_path' => env('TELEGRAM_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
             'webhook_url' => env('TELEGRAM_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
             /*
