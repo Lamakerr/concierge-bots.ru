@@ -195,16 +195,14 @@ class BotController extends Controller
 
     public function setWebhook()
     {
-        $telegram = new Api('6354720815:AAHVjv5veBbLUKwndkfeNFyEM2ZQqnjAY-g');
+        $telegram = new Api(env("TG_TOKEN"));
         $response = $telegram->setWebhook(['url' => 'https://concierge-bots.ru/webhook']);
         return $response;
     }
 
     public function handleWebhook(Request $request)
     {
-
-        $telegram = new Api('6354720815:AAHVjv5veBbLUKwndkfeNFyEM2ZQqnjAY-g');
-
+        $telegram = new Api(env("TG_TOKEN"));
         $update = $telegram->getWebhookUpdates();
 
         if (isset($update->my_chat_member)) {
