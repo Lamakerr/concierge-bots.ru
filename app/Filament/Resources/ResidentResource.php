@@ -115,12 +115,6 @@ class ResidentResource extends Resource
                             $set('number', null);
                         }),
 
-                    // // Кнопка для создания нового дома
-                    // Forms\Components\Button::make('Создать новый дом')
-                    //     ->action(function (callable $set) {
-                    //         // Ваша логика для создания нового дома
-                    //         // Например, показать модальное окно или редирект на соответствующую страницу
-                    //     }),
 
                     // Поля для создания нового дома, если оно отсутствует
                     Forms\Components\Group::make([
@@ -142,21 +136,6 @@ class ResidentResource extends Resource
                     ]);
     }
     
-    public static function create(Create $record): void
-       {
-           
-
-           // Проверка на существование квартиры
-           $apartment = Apartment::where('number', $record->apartment_number)->first();
-
-           if (!$apartment) {
-               // Если квартира не найдена, можно выбросить ошибку или создать квартиру
-               throw ValidationException::withMessages([
-                   'apartment_number' => 'Квартира с таким номером не существует.',
-               ]);
-           }
-
-       }
 
     public static function table(Table $table): Table
     {

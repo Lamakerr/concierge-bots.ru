@@ -98,10 +98,12 @@ class BotController extends Controller
                         'text' => "Благодарю Вас, сообщение отправлено тем жителям дома у кого включены уведомления о ЧП!",
                     ]);
                 } else {
-                    $telegram->sendMessage([
-                        'chat_id' => $chat_id,
-                        'text' => "От пользователя @$fallbackUsername Пришло сообщение о ЧП :\n $text",
-                    ]);
+                    if($chat_id) {
+                        $telegram->sendMessage([
+                            'chat_id' => $chat_id,
+                            'text' => "От пользователя @$fallbackUsername Пришло сообщение о ЧП :\n $text",
+                        ]);
+                    }
                 }
                 $residentForStatistic = Resident::where('chat_id', $chat_id)->first();
                 if ($residentForStatistic) {
@@ -162,11 +164,13 @@ class BotController extends Controller
                         'text' => "Благодарю Вас, сообщение отправлено тем жителям дома у кого включены уведомления о домофоне! Ожидайте.",
                     ]);
                 } else {
-                    $telegram->sendMessage([
-                        'chat_id' => $chat_id,
-                        'text' => "От пользователя @$fallbackUsername Пришло сообщение с просьбой открыть дверь домофона:\n $text",
-                        'reply_markup' => $replyMarkup,
-                    ]);
+                    if($chat_id) {
+                        $telegram->sendMessage([
+                            'chat_id' => $chat_id,
+                            'text' => "От пользователя @$fallbackUsername Пришло сообщение с просьбой открыть дверь домофона:\n $text",
+                            'reply_markup' => $replyMarkup,
+                        ]);
+                    }   
                 }
             }
             DialogState::updateOrCreate(
